@@ -1,0 +1,19 @@
+.book {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	font-size: 2vh;
+	border: 1px solid black;
+}
+
+.book > .title {
+	border: 1px solid red;
+	padding: 0vh;
+	margin:0vh;
+}
+	
+.book > .author {
+	border: 1px solid red;
+	padding: 0vh;
+	margin:0vh
+}

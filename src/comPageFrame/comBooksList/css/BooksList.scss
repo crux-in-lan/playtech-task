@@ -1,0 +1,18 @@
+.bookslist {
+    margin: 2.08% 4.16% 2.08% 4.16%;
+    background: #fff;
+    border-radius: 1em;
+    // box-sizing: border-box;    
+    padding: 8.33%;  
+    overflow: hidden;
+
+  /* Large devices (laptops/desktops, 992px and up) */
+  @media only screen and (min-width: 992px) {
+    padding: 4.16%;
+  }
+
+  /* Extra large devices (large laptops and desktops, 1200px and up) */
+  @media only screen and (min-width: 1200px) {
+    padding: 2.08%;
+  }
+ }
