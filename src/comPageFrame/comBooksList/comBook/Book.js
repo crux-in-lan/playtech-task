@@ -12,7 +12,7 @@ class Book extends Component {
 	render() {
 		const {title, author, refCallbackElementHeight} = this.props;
 		return (
-			<div ref={refCallbackElementHeight} className='book'>
+			<div style={{marginTop:this.props.marginTop,marginBottom:this.props.marginBottom}} ref={refCallbackElementHeight} className='book'>
 				<div className='title'>{title}</div>
 				<div className='author'>{author}</div>
 			</div>

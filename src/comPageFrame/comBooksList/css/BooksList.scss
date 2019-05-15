@@ -1,19 +1,7 @@
 .bookslist {
-    margin: 2.08vw 4.16vh 2.08vw 4.16vh;
     background: #fff;
-    border-radius: 1em;
-    // box-sizing: border-box;    
-    padding: 8.33vh 8.33vw;  
-    overflow: hidden;
-    height: 40vh;
-
-  /* Large devices (laptops/desktops, 992px and up) */
-  @media only screen and (min-width: 992px) {
-    padding: 4.16vh 4.16vw;
-  }
-
-  /* Extra large devices (large laptops and desktops, 1200px and up) */
-  @media only screen and (min-width: 1200px) {
-    padding: 2.08vh 2.08vw;
-  }
+    border-radius: 20px;
+    overflow: auto;
+    width: 1000px;
+    height: 340px;
  }
