@@ -1,13 +1,23 @@
-import React from 'react';
+import React,{Component} from 'react';
 import './css/Book.scss';
-const Book = (props) => {
-	const {title, author} = props;
-	return (
-		<div className='book'>
-			<div className='title'>{title}</div>
-			<div className='author'>{author}</div>
-		</div>
-	)
+class Book extends Component {
+	constructor(props){
+		super(props);		
+	}
+
+	// componentDidUpdate() {
+	// 	console.log(this.state.height);
+	// }
+
+	render() {
+		const {title, author, refCallbackElementHeight} = this.props;
+		return (
+			<div ref={refCallbackElementHeight} className='book'>
+				<div className='title'>{title}</div>
+				<div className='author'>{author}</div>
+			</div>
+		)
+	}
 }
 
 export default Book;
