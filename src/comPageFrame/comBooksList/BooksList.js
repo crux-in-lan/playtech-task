@@ -5,7 +5,7 @@ import FirstBook from './comBook/FirstBook';
 import Deque from 'double-ended-queue';
 import clone from 'clone';
 
-const booksList = require('./BooksList.json');
+const booksListArr = require('./BooksList.json');
 
 class BooksList extends Component {
 
@@ -19,6 +19,7 @@ class BooksList extends Component {
 			scrollTop: 0,
 			calculated: false			
 		}
+		this.booksList = React.createRef();
 		this.topElementIndex = 0;
 		this.bottomElementIndex = 9;
 		this.containerHeight = 1;
@@ -27,30 +28,37 @@ class BooksList extends Component {
 	}
 
 	calculateMarginBottomWithout(loadedElements) {
-		return (booksList.length - loadedElements) * this.elementHeight;
+		return (booksListArr.length - loadedElements) * this.elementHeight;
 	}
 	
 	handleScroll = (event) => {
-		// console.log('Previous Scroll Position',this.state.scrollTop);
-		// console.log('Next Scroll Position',event.currentTarget.scrollTop);
-
+		event.preventDefault();
+		console.log('Handle Scroll');
+		console.log('Previous Scroll Position',this.state.scrollTop);
+		
 	    if(this.state.scrollTop > event.currentTarget.scrollTop) {
+	    	console.log('Next Scroll Position',this.state.scrollTop - this.elementHeight);
 	      this.setState((prevState) => ({
 	        scrollTop: prevState.scrollTop - this.elementHeight	        	        
-	      }));
+	      }), () => {
+	      	this.booksList.current.scrollTo(0,this.state.scrollTop);
+	      });
 	      //Use curring and compose to make deleteLastAndAddPreviousElement function
 	      this.deleteLastElement();
 	    } else if(this.state.scrollTop < event.currentTarget.scrollTop) {
+	    	console.log('Next Scroll Position',this.state.scrollTop + this.elementHeight);
 	      this.setState((prevState) => ({
 	        scrollTop:prevState.scrollTop + this.elementHeight
-	      }));
+	      }), () => {
+	      	this.booksList.current.scrollTo(0,this.state.scrollTop);
+	      });
 	      //Use curring and compose to make deleteFirstAndAddNextElement function
 	      this.deleteFirstElement();
 	    }
 	}
 
 	getFirstNListElements = (count) => {
-		return booksList.slice(0,count);
+		return booksListArr.slice(0,count);
 	}	
 
 	setElementHeight = (height) => {
@@ -94,7 +102,7 @@ class BooksList extends Component {
 
 	addPreviousElement = () => {		
 		const newDeque = clone(this.state.currentList);
-		newDeque.unshift(booksList[this.topElementIndex - 1]);
+		newDeque.unshift(booksListArr[this.topElementIndex - 1]);
 		
 		this.setState((prevState) => ({
 			currentList: newDeque,			
@@ -106,7 +114,7 @@ class BooksList extends Component {
 
 	addNextElement = () => {
 		const newDeque = clone(this.state.currentList);
-		newDeque.push(booksList[this.bottomElementIndex + 1]);	
+		newDeque.push(booksListArr[this.bottomElementIndex + 1]);	
 
 		this.setState((prevState) => ({
 			currentList: newDeque,			
@@ -116,15 +124,17 @@ class BooksList extends Component {
 		});
 	}
 
-	componentDidMount() {
+	componentDidMount() {		
 		// console.log('componentDidMount');
 		// console.log('elementHeight',this.elementHeight);
 		//bookLists event handlers 
-		this.refs.booksList.addEventListener("scroll",this.handleScroll.bind(this));
+		this.booksList.current.addEventListener("scroll",this.handleScroll.bind(this));
 
 		//Initialise the container height
-		this.containerHeight = this.refs.booksList.getBoundingClientRect().height;
+		this.containerHeight = this.booksList.current.getBoundingClientRect().height;
 		this.elementsCount = this.calculateBooksCount(this.containerHeight,this.elementHeight);
+		// console.log('containerHeight',this.containerHeight);
+		// console.log('elementHeight',this.elementHeight);
 		this.topElementIndex = 0;
 		this.bottomElementIndex = this.elementsCount - 1;
 
@@ -138,11 +148,16 @@ class BooksList extends Component {
 		// console.log('componentDidMount2');
 	}
 
-	componentDidUpdate() {
+	componentDidUpdate(prevProps, prevState, snapshot) {
 		//Bind to the view
-		this.refs.booksList.scrollTop = this.state.scrollTop;
-
+		// console.log('scrollTop',this.state.scrollTop);
 		// console.log('componentDidUpdate');
+		// console.log('prevStateScrollTop',prevState.scrollTop);
+		// console.log('currStateScrollTop',this.state.scrollTop);
+		// if(prevState.scrollTop !== this.state.scrollTop)
+		// {
+		// 	this.refs.booksList.scrollTop = this.state.scrollTop;
+		// }
 	}
 
 	shouldComponentUpdate(nextProps,nextState) {
@@ -158,10 +173,10 @@ class BooksList extends Component {
 		const currentListClone = clone(this.state.currentList);
 		
 		return (
-				<div ref="booksList" className="bookslist">
+				<div ref={this.booksList} className="bookslist">
 				{					
 					!this.state.calculated ?
-					<FirstBook  key={booksList[0]._id} setCalculated={this.setCalculated} setElementHeight={this.setElementHeight} marginTop={0} marginBottom={0} id={booksList[0]._id} title={booksList[0].title.substring(0,20)} author={booksList[0].authors[0].substring(0,20)}/>
+					<FirstBook  key={booksListArr[0]._id} setCalculated={this.setCalculated} setElementHeight={this.setElementHeight} marginTop={0} marginBottom={0} id={booksListArr[0]._id} title={booksListArr[0].title.substring(0,20)} author={booksListArr[0].authors[0].substring(0,20)}/>
 					:
 					currentListClone.toArray().map(book => {
 						index++;
