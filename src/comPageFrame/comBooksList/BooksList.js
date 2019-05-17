@@ -10,15 +10,17 @@ class BooksList extends Component {
 
 		this.state = {
 			currentList: [],
-			containerHeight: 340,			
-			elementHeight: 34,
+			containerHeight: 0,			
+			elementHeight: 0,
 			elementsCount: 1,
 			marginBottom: 0,
 			marginTop: 0,
 			scrollTop: 0,
 			topElementIndex: 0,
-			bottomElementIndex: 9
+			bottomElementIndex: 9			
 		}
+
+		this.componentUpdatedCount = 0;
 	}
 
 	calculateMarginBottomWithout(loadedElements) {
@@ -48,23 +50,29 @@ class BooksList extends Component {
 		return booksList.slice(0,count);
 	}	
 
-	refCallbackContainerHeight = element => {
-		if (element) {
-		  this.setState({containerHeight: element.getBoundingClientRect().height});
-		}
+	setElementHeight = (height) => {
+		this.setState({elementHeight: height});
 	}
 
-	refCallbackElementHeight = element => {
-		if (element) {
-		  this.setState({elementHeight: element.getBoundingClientRect().height});
-		}
-	}
+	// refCallbackContainerHeight = element => {
+	// 	if (element) {
+	// 	  this.setState({containerHeight: element.getBoundingClientRect().height});
+	// 	}
+	// }
+
+	// refCallbackElementHeight = element => {
+	// 	console.log("refCallbackElementHeight");
+	// 	if (element) {
+	// 	  this.setState({elementHeight: element.getBoundingClientRect().height});
+	// 	}
+	// }
 
 	calculateBooksCount = (containerHeiht,bookHeight) => {
 		return Math.ceil(containerHeiht/bookHeight) + 1;
 	}
 
 	deleteFirstElement = () => {
+		console.log('Delete first element');
 		const newList = JSON.parse(JSON.stringify(this.state.currentList));
 		newList.shift();
 		this.setState({
@@ -77,6 +85,7 @@ class BooksList extends Component {
 	}
 
 	deleteLastElement = () => {
+		console.log('Delete last element');
 		const newList = JSON.parse(JSON.stringify(this.state.currentList));
 		newList.splice(-1,1);
 		this.setState({
@@ -89,6 +98,7 @@ class BooksList extends Component {
 	}
 
 	addPreviousElement = () => {
+		console.log('Add previous element');
 		// console.log("Previous element",booksList[this.state.topElementIndex - 1]);
 		// console.log("Current element",booksList[this.state.topElementIndex]);
 		const newList = [booksList[this.state.topElementIndex - 1],...JSON.parse(JSON.stringify(this.state.currentList))];
@@ -100,25 +110,44 @@ class BooksList extends Component {
 	}
 
 	addNextElement = () => {
+		console.log('Add next element');
 		// console.log("Next element",booksList[this.state.bottomElementIndex + 1]);
 		// console.log("Current element",booksList[this.state.bottomElementIndex]);
 		const newList = [...JSON.parse(JSON.stringify(this.state.currentList)),booksList[this.state.bottomElementIndex + 1]];
-		this.setState({
+		this.setState((prevState) => ({
 			currentList: newList,
-			bottomElementIndex: this.state.bottomElementIndex + 1,
-			marginBottom: this.state.marginBottom - this.state.elementHeight
-		});
+			bottomElementIndex: prevState.bottomElementIndex + 1,
+			marginBottom: prevState.marginBottom - prevState.elementHeight
+		}));
+	}
+
+	calculateElementsCount = (containerHeight, elementHeight) => {
+		return Math.ceil(containerHeight/elementHeight);
 	}
 
 	componentDidMount() {
-		// console.log(booksList);
-		const firstNListElements = this.getFirstNListElements(10);
-		this.setState({marginBottom: this.calculateMarginBottomWithout(10)});
-		this.setState({currentList: firstNListElements});	
+
+		// console.log('componentDidMount');
+		const firstElement = this.getFirstNListElements(1);	
+
 		this.setState({
-			topElementIndex: 0,
-			bottomElementIndex: firstNListElements.length-1
-		});
+			containerHeight: this.refs.booksList.getBoundingClientRect().height,
+			currentList: firstElement
+		},() => {
+			console.log("componentDidMount: ",this.componentUpdatedCount);
+			// console.log('MyBook: ',);
+			// console.log('The element height: ',this.state.elementHeight);
+			const elementsCount = this.calculateElementsCount(this.state.containerHeight,this.state.elementHeight);
+			const firstNListElements = this.getFirstNListElements(elementsCount);
+			this.setState({
+				marginBottom: this.calculateMarginBottomWithout(elementsCount),
+				currentList: firstNListElements,
+				topElementIndex: 0,
+				bottomElementIndex: firstNListElements.length-1
+			});	
+		});		
+		
+		// this.setState({elementHeight: });
 	}
 
 	// shouldComponentUpdate() {
@@ -126,7 +155,32 @@ class BooksList extends Component {
 	// }
 
 	componentDidUpdate() {
-		this.refs.elem.scrollTop = this.state.scrollTop;
+		console.log("componentDidUpdate: ",this.componentUpdatedCount);
+		this.refs.booksList.scrollTop = this.state.scrollTop;
+		// console.log('Update Sequence: ',this.componentUpdatedCount);
+		// if(this.componentUpdatedCount === 0) {
+			// console.log('CCCVVCCCV');
+			this.componentUpdatedCount++;
+		// }
+		// else if(this.componentUpdatedCount === 1) {			
+			// console.log('componentDidMount booksList');
+				
+			// this.componentUpdatedCount++;
+			// console.log('AAAAAAAA');
+			// console.log('containerHeight',this.state.containerHeight);
+			// console.log('elementHeight',this.state.elementHeight);
+			// debugger;
+
+		// } else {			
+			// this.componentUpdatedCount++;
+			
+			// console.log('BBBBBBBB');
+			// console.log('containerHeight',this.state.containerHeight);
+			// console.log('elementHeight',this.state.elementHeight);
+			// console.log(this.state.currentList);
+			// debugger;
+		// }		
+		
 		// console.log('topElementIndex',this.state.topElementIndex);
 		// console.log('bottomElementIndex',this.state.bottomElementIndex);
 		// console.log(this.state.scrollTop);
@@ -148,17 +202,17 @@ class BooksList extends Component {
 	render() {
 		let index = 0;
 		return (
-				<div onScroll={this.handleScroll} ref="elem" className="bookslist">
+				<div onScroll={this.handleScroll} ref="booksList" className="bookslist">
 				{					
 					this.state.currentList.map(book => {
 						index++;
 						// console.log('BOOKAAA',book);
 						if(index===1) {
-							return <Book  key={book._id} marginTop={this.state.marginTop} marginBottom={0} refCallbackElementHeight={this.refCallbackElementHeight} id={book._id} title={book.title.substring(0,20)} author={book.authors[0].substring(0,20)}/>
+							return <Book key={book._id} marginTop={this.state.marginTop} marginBottom={0} setElementHeight={this.setElementHeight} id={book._id} title={book.title.substring(0,20)} author={book.authors[0].substring(0,20)}/>
 						}else if(index===this.state.currentList.length) {
-							return <Book  key={book._id} marginTop={0} marginBottom={this.state.marginBottom} refCallbackElementHeight={this.refCallbackElementHeight} id={book._id} title={book.title.substring(0,20)} author={book.authors[0].substring(0,20)}/>
+							return <Book  key={book._id} marginTop={0} marginBottom={this.state.marginBottom} setElementHeight={this.setElementHeight} id={book._id} title={book.title.substring(0,20)} author={book.authors[0].substring(0,20)}/>
 						} else {			
-							return <Book  key={book._id} marginTop={0} marginBottom={0} refCallbackElementHeight={this.refCallbackElementHeight} id={book._id} title={book.title.substring(0,20)} author={book.authors[0].substring(0,20)}/>
+							return <Book  key={book._id} marginTop={0} marginBottom={0} setElementHeight={this.setElementHeight} id={book._id} title={book.title.substring(0,20)} author={book.authors[0].substring(0,20)}/>
 						}
 					})
 				}
