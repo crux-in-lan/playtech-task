@@ -13,8 +13,7 @@ class BooksList extends Component {
 		super(props);
 
 		this.state = {
-			currentList: new Deque(10),
-			elementsCount: 1,
+			currentList: new Deque(10),			
 			marginBottom: 0,
 			marginTop: 0,
 			scrollTop: 0,
@@ -24,6 +23,7 @@ class BooksList extends Component {
 		this.bottomElementIndex = 9;
 		this.containerHeight = 1;
 		this.elementHeight = 1;
+		this.elementsCount = 1;
 	}
 
 	calculateMarginBottomWithout(loadedElements) {
@@ -55,7 +55,7 @@ class BooksList extends Component {
 
 	setElementHeight = (height) => {
 		this.elementHeight = height;
-		console.log('setElementHeight');		
+		// console.log('setElementHeight');		
 	}
 
 	setCalculated = (isCalculated) => {
@@ -117,18 +117,21 @@ class BooksList extends Component {
 	}
 
 	componentDidMount() {
-		console.log('componentDidMount');
-		console.log('elementHeight',this.elementHeight);
+		// console.log('componentDidMount');
+		// console.log('elementHeight',this.elementHeight);
 		//bookLists event handlers 
 		this.refs.booksList.addEventListener("scroll",this.handleScroll.bind(this));
 
 		//Initialise the container height
 		this.containerHeight = this.refs.booksList.getBoundingClientRect().height;
+		this.elementsCount = this.calculateBooksCount(this.containerHeight,this.elementHeight);
+		this.topElementIndex = 0;
+		this.bottomElementIndex = this.elementsCount - 1;
 
-		// console.log(booksList);
-		const firstNListElements = new Deque(this.getFirstNListElements(10));
+		// console.log('elementsCount',this.elementsCount);
+		const firstNListElements = new Deque(this.getFirstNListElements(this.elementsCount));
 		this.setState({
-			marginBottom: this.calculateMarginBottomWithout(10),
+			marginBottom: this.calculateMarginBottomWithout(this.elementsCount),
 			currentList: firstNListElements,
 			bottomElementIndex: firstNListElements.length-1
 		});
