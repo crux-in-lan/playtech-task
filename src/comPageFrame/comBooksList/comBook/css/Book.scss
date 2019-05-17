@@ -2,18 +2,21 @@
 	display: flex;
 	flex-direction: row;
 	justify-content: space-around;
-	font-size: 2vh;
+	font-size: 21px;
+	line-height: 30px;
 	border: 1px solid black;
 }
 
 .book > .title {
 	border: 1px solid red;
-	padding: 0vh;
-	margin:0vh;
+	// outline: 1px solid orange;
+	padding: 0px;
+	margin:0px;
 }
 	
 .book > .author {
 	border: 1px solid red;
-	padding: 0vh;
-	margin:0vh
+	// outline: 1px solid orange;
+	padding: 0px;
+	margin:0px
 }
