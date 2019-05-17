@@ -1,4 +1,4 @@
-/*libraries and APIs*/
+/*libraries and APIs*/ 
 import React, { Component } from 'react';
 
 /*common for the whole application*/
