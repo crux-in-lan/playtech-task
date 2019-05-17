@@ -33,11 +33,11 @@ class BooksList extends Component {
 	
 	handleScroll = (event) => {
 		event.preventDefault();
-		console.log('Handle Scroll');
-		console.log('Previous Scroll Position',this.state.scrollTop);
+		// console.log('Handle Scroll');
+		// console.log('Previous Scroll Position',this.state.scrollTop);
 		
 	    if(this.state.scrollTop > event.currentTarget.scrollTop) {
-	    	console.log('Next Scroll Position',this.state.scrollTop - this.elementHeight);
+	    	// console.log('Next Scroll Position',this.state.scrollTop - this.elementHeight);
 	      this.setState((prevState) => ({
 	        scrollTop: prevState.scrollTop - this.elementHeight	        	        
 	      }), () => {
@@ -46,7 +46,7 @@ class BooksList extends Component {
 	      //Use curring and compose to make deleteLastAndAddPreviousElement function
 	      this.deleteLastElement();
 	    } else if(this.state.scrollTop < event.currentTarget.scrollTop) {
-	    	console.log('Next Scroll Position',this.state.scrollTop + this.elementHeight);
+	    	// console.log('Next Scroll Position',this.state.scrollTop + this.elementHeight);
 	      this.setState((prevState) => ({
 	        scrollTop:prevState.scrollTop + this.elementHeight
 	      }), () => {
