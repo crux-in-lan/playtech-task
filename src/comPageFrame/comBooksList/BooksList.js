@@ -1,6 +1,10 @@
 import React, {Component} from 'react';
 import './css/BooksList.scss';
 import Book from './comBook/Book';
+import FirstBook from './comBook/FirstBook';
+import Deque from 'double-ended-queue';
+import clone from 'clone';
+
 const booksList = require('./BooksList.json');
 
 class BooksList extends Component {
@@ -9,17 +13,17 @@ class BooksList extends Component {
 		super(props);
 
 		this.state = {
-			currentList: [],
+			currentList: new Deque(10),
 			elementsCount: 1,
 			marginBottom: 0,
 			marginTop: 0,
 			scrollTop: 0,
-			topElementIndex: 0,
-			bottomElementIndex: 9
+			calculated: false			
 		}
-
-		this.containerHeight = 170;
-		this.elementHeight = 17;
+		this.topElementIndex = 0;
+		this.bottomElementIndex = 9;
+		this.containerHeight = 1;
+		this.elementHeight = 1;
 	}
 
 	calculateMarginBottomWithout(loadedElements) {
@@ -49,120 +53,128 @@ class BooksList extends Component {
 		return booksList.slice(0,count);
 	}	
 
-	refCallbackContainerHeight = element => {
-		if (element) {
-		  this.containerHeight = element.getBoundingClientRect().height;
-		}
+	setElementHeight = (height) => {
+		this.elementHeight = height;
+		console.log('setElementHeight');		
 	}
 
-	refCallbackElementHeight = element => {
-		if (element) {
-		  this.elementHeight = element.getBoundingClientRect().height;
-		}
+	setCalculated = (isCalculated) => {
+		this.setState({calculated:isCalculated});
 	}
 
-	calculateBooksCount = (containerHeiht,bookHeight) => {
-		return Math.ceil(containerHeiht/bookHeight) + 1;
+	calculateBooksCount = (containerHeight,bookHeight) => {
+		return Math.ceil(containerHeight/bookHeight) + 1;
 	}
 
 	deleteFirstElement = () => {
-		const newList = JSON.parse(JSON.stringify(this.state.currentList));
-		newList.shift();
+		const newDeque = clone(this.state.currentList);
+		newDeque.shift();
+		
 		this.setState((prevState) => ({
-			currentList: newList,
-			topElementIndex: prevState.topElementIndex + 1,
+			currentList: newDeque,			
 			marginTop: prevState.marginTop + this.elementHeight,			
 		}),() => {
+			this.topElementIndex++;
 			this.addNextElement();
 		});
 	}
 
 	deleteLastElement = () => {
-		const newList = JSON.parse(JSON.stringify(this.state.currentList));
-		newList.splice(-1,1);
+		const newDeque = clone(this.state.currentList);
+		newDeque.pop();
+		
 		this.setState((prevState) => ({
-			currentList: newList,
-			bottomElementIndex: prevState.bottomElementIndex - 1,
+			currentList: newDeque,			
 			marginBottom: prevState.marginBottom + this.elementHeight
 		}),() => {
+			this.bottomElementIndex--;
 			this.addPreviousElement();
 		});
 	}
 
-	addPreviousElement = () => {
+	addPreviousElement = () => {		
+		const newDeque = clone(this.state.currentList);
+		newDeque.unshift(booksList[this.topElementIndex - 1]);
 		
-		const newList = [booksList[this.state.topElementIndex - 1],...JSON.parse(JSON.stringify(this.state.currentList))];
 		this.setState((prevState) => ({
-			currentList: newList,
-			topElementIndex: prevState.topElementIndex - 1,
+			currentList: newDeque,			
 			marginTop: prevState.marginTop - this.elementHeight
-		}));
-	}
-
-	addNextElement = () => {
-		// console.log("Next element",booksList[this.state.bottomElementIndex + 1]);
-		// console.log("Current element",booksList[this.state.bottomElementIndex]);
-		const newList = [...JSON.parse(JSON.stringify(this.state.currentList)),booksList[this.state.bottomElementIndex + 1]];
-		this.setState((prevState) => ({
-			currentList: newList,
-			bottomElementIndex: prevState.bottomElementIndex + 1,
-			marginBottom: prevState.marginBottom - this.elementHeight
-		}));
-	}
-
-	componentDidMount() {
-		//bookLists event handlers 
-		this.refs.booksList.addEventListener("scroll",this.handleScroll.bind(this));
-
-		// console.log(booksList);
-		const firstNListElements = this.getFirstNListElements(10);
-		this.setState({
-			marginBottom: this.calculateMarginBottomWithout(10),
-			currentList: firstNListElements,
-			topElementIndex: 0,
-			bottomElementIndex: firstNListElements.length-1
+		}),() => {
+			this.topElementIndex--;
 		});
 	}
 
-	// shouldComponentUpdate() {
-	// 	console.log(this.state.containerHeight, this.state.elementHeight);
-	// }
+	addNextElement = () => {
+		const newDeque = clone(this.state.currentList);
+		newDeque.push(booksList[this.bottomElementIndex + 1]);	
+
+		this.setState((prevState) => ({
+			currentList: newDeque,			
+			marginBottom: prevState.marginBottom - this.elementHeight
+		}), () => {
+			this.bottomElementIndex++;
+		});
+	}
+
+	componentDidMount() {
+		console.log('componentDidMount');
+		console.log('elementHeight',this.elementHeight);
+		//bookLists event handlers 
+		this.refs.booksList.addEventListener("scroll",this.handleScroll.bind(this));
+
+		//Initialise the container height
+		this.containerHeight = this.refs.booksList.getBoundingClientRect().height;
+
+		// console.log(booksList);
+		const firstNListElements = new Deque(this.getFirstNListElements(10));
+		this.setState({
+			marginBottom: this.calculateMarginBottomWithout(10),
+			currentList: firstNListElements,
+			bottomElementIndex: firstNListElements.length-1
+		});
+		// console.log('componentDidMount2');
+	}
 
 	componentDidUpdate() {
 		//Bind to the view
 		this.refs.booksList.scrollTop = this.state.scrollTop;
+
+		// console.log('componentDidUpdate');
 	}
 
-	shouldComponentUpdate(nextProps, nextState) {
-		// if(this.state.elementsCount === nextState.elementsCount){
-		// 	return false;
-		// } else if {
-
-		// }
-		// console.log("currentState",this.state);
-		// console.log("nextState",nextState);
+	shouldComponentUpdate(nextProps,nextState) {
+		// console.log('shouldComponentUpdate');
+		// console.log('currState', this.state);
+		// console.log('nextState', nextState);
 		return true;
 	}
 
+
 	render() {
 		let index = 0;
+		const currentListClone = clone(this.state.currentList);
+		
 		return (
 				<div ref="booksList" className="bookslist">
 				{					
-					this.state.currentList.map(book => {
+					!this.state.calculated ?
+					<FirstBook  key={booksList[0]._id} setCalculated={this.setCalculated} setElementHeight={this.setElementHeight} marginTop={0} marginBottom={0} id={booksList[0]._id} title={booksList[0].title.substring(0,20)} author={booksList[0].authors[0].substring(0,20)}/>
+					:
+					currentListClone.toArray().map(book => {
 						index++;
 						// console.log('BOOKAAA',book);
 						if(index===1) {
-							return <Book  key={book._id} marginTop={this.state.marginTop} marginBottom={0} refCallbackElementHeight={this.refCallbackElementHeight} id={book._id} title={book.title.substring(0,20)} author={book.authors[0].substring(0,20)}/>
+							return <Book  key={book._id} marginTop={this.state.marginTop} marginBottom={0} id={book._id} title={book.title.substring(0,20)} author={book.authors[0].substring(0,20)}/>
 						}else if(index===this.state.currentList.length) {
-							return <Book  key={book._id} marginTop={0} marginBottom={this.state.marginBottom} refCallbackElementHeight={this.refCallbackElementHeight} id={book._id} title={book.title.substring(0,20)} author={book.authors[0].substring(0,20)}/>
+							return <Book  key={book._id} marginTop={0} marginBottom={this.state.marginBottom} id={book._id} title={book.title.substring(0,20)} author={book.authors[0].substring(0,20)}/>
 						} else {			
-							return <Book  key={book._id} marginTop={0} marginBottom={0} refCallbackElementHeight={this.refCallbackElementHeight} id={book._id} title={book.title.substring(0,20)} author={book.authors[0].substring(0,20)}/>
+							return <Book  key={book._id} marginTop={0} marginBottom={0} id={book._id} title={book.title.substring(0,20)} author={book.authors[0].substring(0,20)}/>
 						}
 					})
 				}
 				</div>
 		)
+		
 	}
 }
 
