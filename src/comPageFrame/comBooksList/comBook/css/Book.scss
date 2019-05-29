@@ -3,20 +3,20 @@
 	flex-direction: row;
 	justify-content: space-around;
 	font-size: 21px;
-	line-height: 30px;
+	line-height: 32px;
 	border: 1px solid black;
 }
 
 .book > .title {
-	border: 1px solid red;
+	border: .06rem solid red;
 	// outline: 1px solid orange;
 	padding: 0px;
 	margin:0px;
 }
 	
 .book > .author {
-	border: 1px solid red;
+	border: .06rem solid red;
 	// outline: 1px solid orange;
 	padding: 0px;
-	margin:0px
+	margin:0px;
 }

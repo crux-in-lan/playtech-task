@@ -15,16 +15,18 @@ class BooksList extends Component {
 		this.state = {
 			currentList: new Deque(10),			
 			marginBottom: 0,
-			marginTop: 0,
-			scrollTop: 0,
+			marginTop: 0,			
 			calculated: false			
 		}
+		this.handleScroll = this.handleScroll.bind(this);
 		this.booksList = React.createRef();
 		this.topElementIndex = 0;
 		this.bottomElementIndex = 9;
 		this.containerHeight = 1;
 		this.elementHeight = 1;
 		this.elementsCount = 1;
+		this.scrollTop = 0;
+		this.scrolled = false;
 	}
 
 	calculateMarginBottomWithout(loadedElements) {
@@ -36,25 +38,34 @@ class BooksList extends Component {
 		// console.log('Handle Scroll');
 		// console.log('Previous Scroll Position',this.state.scrollTop);
 		
-	    if(this.state.scrollTop > event.currentTarget.scrollTop) {
-	    	// console.log('Next Scroll Position',this.state.scrollTop - this.elementHeight);
-	      this.setState((prevState) => ({
-	        scrollTop: prevState.scrollTop - this.elementHeight	        	        
-	      }), () => {
-	      	this.booksList.current.scrollTo(0,this.state.scrollTop);
-	      });
+		// console.log('PrevScrollPos: ',this.scrollTop);
+		// console.log('CurrScrollPos: ',event.currentTarget.scrollTop);
+		// console.log('scrolled: ',this.scrolled);
+	    if(this.scrollTop > event.currentTarget.scrollTop && this.scrolled === false) {
+    		// console.log('Next Scroll Position',this.state.scrollTop - this.elementHeight);
+      		this.scrollTop -= this.elementHeight;
+      		this.booksList.current.scrollTo(0,this.scrollTop);
+	     
 	      //Use curring and compose to make deleteLastAndAddPreviousElement function
 	      this.deleteLastElement();
-	    } else if(this.state.scrollTop < event.currentTarget.scrollTop) {
-	    	// console.log('Next Scroll Position',this.state.scrollTop + this.elementHeight);
-	      this.setState((prevState) => ({
-	        scrollTop:prevState.scrollTop + this.elementHeight
-	      }), () => {
-	      	this.booksList.current.scrollTo(0,this.state.scrollTop);
-	      });
+	      
+	    } else if(this.scrollTop < event.currentTarget.scrollTop && this.scrolled === false) {
+    		// console.log('Next Scroll Position',this.state.scrollTop + this.elementHeight);
+
+	      	this.scrollTop += this.elementHeight;	      
+	      	this.booksList.current.scrollTo(0,this.scrollTop);
+	    
 	      //Use curring and compose to make deleteFirstAndAddNextElement function
 	      this.deleteFirstElement();
+	     
+	    } else if (this.scrollTop === event.currentTarget.scrollTop) {
+	    	console.log('The bug');
 	    }
+
+	    //Swap scrolled
+	    this.scrolled  = !this.scrolled;
+
+	    return false;
 	}
 
 	getFirstNListElements = (count) => {
@@ -128,7 +139,7 @@ class BooksList extends Component {
 		// console.log('componentDidMount');
 		// console.log('elementHeight',this.elementHeight);
 		//bookLists event handlers 
-		this.booksList.current.addEventListener("scroll",this.handleScroll.bind(this));
+		this.booksList.current.addEventListener("scroll",this.handleScroll);
 
 		//Initialise the container height
 		this.containerHeight = this.booksList.current.getBoundingClientRect().height;
